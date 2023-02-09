@@ -1,14 +1,13 @@
-FROM node:16-slim
-
+FROM node:18
 WORKDIR /code
-
 ADD package.json package-lock.json /code/
+RUN apt-get update && apt-get install -y apt-utils
+RUN apt-get update -qq && apt-get install -y -qq curl
+RUN curl -sL https://deb.nodesource.com/setup_18.x | bash -
+RUN apt-get update -qq && apt-get install -y -qq nodejs
 
-RUN npm config set registry https://registry.npm.taobao.org \
-    && npm config set disturl https://npm.taobao.org/dist \
-    && npm config set puppeteer_download_host https://npm.taobao.org/mirrors
-RUN  npm install \
-     && npm run puppet-install
+ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
+
 
 # Suppress an apt-key warning about standard out not being a terminal. Use in this script is safe.
 ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
@@ -26,5 +25,7 @@ RUN apt-get update \
 
 ADD . /code
 
-RUN npm run build
+#RUN npm run build
+RUN npm i
+RUN npm install -g npm@9.2.0
 CMD ["node", "lib/bundle.esm.js"]
